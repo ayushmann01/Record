@@ -1,11 +1,8 @@
-package com.example.record;
+package com.example.record.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.database.Cursor;
-import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -13,8 +10,31 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.record.R;
+
+
+
+
 public class MainActivity extends AppCompatActivity {
-     SQLiteDatabase myDatabase;
+
+   private Button button_add;
+   private Button button_update;
+   private Button button_delete;
+   private Button button_cancel;
+   private Button button_Last;
+   private Button button_next;
+   private Button button_prev;
+   private Button button_first;
+   private RecordController record;
+   //Database database;
+
+
+   private EditText text_id;
+   private EditText text_name;
+   private EditText text_semester;
+
+
+    // SQLiteDatabase myDatabase;
      static long total_student;
      long i= 1;
      int lock = 0;
@@ -23,31 +43,20 @@ public class MainActivity extends AppCompatActivity {
     public void setDetails() {
          try {
              i=1;
-             myDatabase = this.openOrCreateDatabase("Students", MODE_PRIVATE, null);
-             myDatabase.execSQL("CREATE TABLE IF NOT EXISTS students (id INT NOT NULL, name VARCHAR, semester INT(1), PRIMARY KEY (id) )");
-             //myDatabase.execSQL("DELETE FROM students WHERE id=1");
-
-             total_student = DatabaseUtils.queryNumEntries(myDatabase,"students");
-             Cursor c = myDatabase.rawQuery("SELECT * FROM students", null);
-
+             Cursor c = record.getAllData();
+             c.moveToFirst();
 
              int idIndex = c.getColumnIndex("id");
              int nameIndex = c.getColumnIndex("name");
              int semesterIndex = c.getColumnIndex("semester");
 
-             c.moveToFirst();
-
-             EditText text_id = (EditText) findViewById(R.id.text_id);
-             EditText text_name = (EditText) findViewById((R.id.text_name));
-             EditText text_semester = (EditText) findViewById(R.id.text_semester);
-
              text_id.setInputType(InputType.TYPE_NULL);
              text_name.setInputType(InputType.TYPE_NULL);
              text_semester.setInputType(InputType.TYPE_NULL);
 
-
              if (total_student > 0) {
                  text_id.setText(Integer.toString(c.getInt(idIndex)));
+
                  text_name.setText(c.getString(nameIndex));
                  text_semester.setText(Integer.toString(c.getInt(semesterIndex)));
              }
@@ -60,14 +69,6 @@ public class MainActivity extends AppCompatActivity {
          } catch (Exception e) {
              e.printStackTrace();
          }
-        Button button_add = (Button) findViewById(R.id.button_add);
-        Button button_update = (Button) findViewById(R.id.button_update);
-        Button button_delete = (Button) findViewById(R.id.button_delete);
-        Button button_cancel = (Button) findViewById(R.id.button_cancel);
-        Button button_Last = (Button) findViewById(R.id.button_last);
-        Button button_next = (Button) findViewById(R.id.button_next);
-        Button button_prev = (Button) findViewById(R.id.button_prev);
-        Button button_first = (Button) findViewById(R.id.button_first);
 
         button_add.setEnabled(true);
         button_delete.setEnabled(true);
@@ -81,14 +82,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void onAdd(View view){
 
-        Button button_add = (Button) findViewById(R.id.button_add);
-        Button button_update = (Button) findViewById(R.id.button_update);
-        Button button_delete = (Button) findViewById(R.id.button_delete);
-        Button button_cancel = (Button) findViewById(R.id.button_cancel);
-        Button button_Last = (Button) findViewById(R.id.button_last);
-        Button button_next = (Button) findViewById(R.id.button_next);
-        Button button_prev = (Button) findViewById(R.id.button_prev);
-        Button button_first = (Button) findViewById(R.id.button_first);
 
         button_add.setEnabled(false);
         button_delete.setEnabled(false);
@@ -111,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
         text_semester.setText(null);
         lock = 1;
 
-      //  Toast.makeText(this,text_name.getText().toString(),Toast.LENGTH_SHORT).show();
     }
 
     public void onUpdate(View view){
@@ -122,14 +114,6 @@ public class MainActivity extends AppCompatActivity {
         EditText text_semester = (EditText) findViewById(R.id.text_semester);
 
         if(lock == 0) {
-            Button button_add = (Button) findViewById(R.id.button_add);
-            Button button_update = (Button) findViewById(R.id.button_update);
-            Button button_delete = (Button) findViewById(R.id.button_delete);
-            Button button_cancel = (Button) findViewById(R.id.button_cancel);
-            Button button_Last = (Button) findViewById(R.id.button_last);
-            Button button_next = (Button) findViewById(R.id.button_next);
-            Button button_prev = (Button) findViewById(R.id.button_prev);
-            Button button_first = (Button) findViewById(R.id.button_first);
 
             button_add.setEnabled(false);
             button_delete.setEnabled(false);
@@ -148,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             update = 1;
         }
 
-
+                //major bugs in this function(does not work in desired way)
 
       if(text_name.getText().toString().trim().length() == 0) {
                 //text_name.setError("Invalid Field");
@@ -159,23 +143,16 @@ public class MainActivity extends AppCompatActivity {
           int id = Integer.parseInt(text_id.getText().toString());
           String name = text_name.getText().toString();
           int semester = Integer.parseInt(text_semester.getText().toString());
-
-          String query = "UPDATE students " +
-                  "SET name = '"+name+"', " +
-                  "semester = "+semester+
-                  " WHERE " +
-                  "id = "+i+";";
-           myDatabase.execSQL(query);
-           Toast.makeText(this,"Updated Successfully",Toast.LENGTH_SHORT);
-           update = 0;
-           lock = 0;
+          record.updateData(id,name,semester);
+          Toast.makeText(this,"Updated Successfully",Toast.LENGTH_SHORT);
+          update = 0;
+          lock = 0;
       }
       else {
           int id = Integer.parseInt(text_id.getText().toString());
           String name = text_name.getText().toString();
           int semester = Integer.parseInt(text_semester.getText().toString());
-
-          myDatabase.execSQL("INSERT INTO students VALUES (" + id + "," + "'" + name + "'" + "," + semester + ")");
+          record.addData(id,name,semester);
           Toast.makeText(this, "Added Succesfully", Toast.LENGTH_SHORT).show();
           setDetails();
           lock = 0;
@@ -185,21 +162,15 @@ public class MainActivity extends AppCompatActivity {
     public void onDelete(View view){
 
         if(total_student != 0) {
-            myDatabase = this.openOrCreateDatabase("Students", MODE_PRIVATE, null);
-            EditText text_id = (EditText) findViewById(R.id.text_id);
-            EditText text_name = (EditText) findViewById(R.id.text_name);
+            text_id = (EditText) findViewById(R.id.text_id);
             int id = Integer.parseInt(text_id.getText().toString());
-            //Toast.makeText(this, id + "", Toast.LENGTH_SHORT).show();
-
-
-            try {
-                myDatabase.execSQL("DELETE FROM students WHERE id=" + id);
+            boolean result = record.delete(id);
+            if(result){
                 Toast.makeText(this, "Deleted Successfully", Toast.LENGTH_SHORT).show();
                 setDetails();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+            }else Toast.makeText(this,"Deletion failed",Toast.LENGTH_SHORT).show();
+
+        }else Toast.makeText(this,"No record found",Toast.LENGTH_SHORT).show();
     }
 
     public void onCancel(View view)
@@ -213,15 +184,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (i < total_student) {
             i = i + 1;
-            EditText text_id = (EditText) findViewById(R.id.text_id);
-            EditText text_name = (EditText) findViewById(R.id.text_name);
-            EditText text_semester = (EditText) findViewById(R.id.text_semester);
+             text_id = (EditText) findViewById(R.id.text_id);
+             text_name = (EditText) findViewById(R.id.text_name);
+             text_semester = (EditText) findViewById(R.id.text_semester);
 
-            myDatabase = this.openOrCreateDatabase("Students", MODE_PRIVATE, null);
-
-            Cursor c = myDatabase.rawQuery("SELECT * FROM students WHERE id=" + i, null);
+            Cursor c = RecordController.showStudent(i);
             c.moveToFirst();
-
             int idIndex = c.getColumnIndex("id");
             int nameIndex = c.getColumnIndex("name");
             int semesterIndex = c.getColumnIndex("semester");
@@ -241,9 +209,7 @@ public class MainActivity extends AppCompatActivity {
             EditText text_name = (EditText) findViewById(R.id.text_name);
             EditText text_semester = (EditText) findViewById(R.id.text_semester);
 
-            myDatabase = this.openOrCreateDatabase("Students", MODE_PRIVATE, null);
-
-            Cursor c = myDatabase.rawQuery("SELECT * FROM students WHERE id=" + i, null);
+            Cursor c = RecordController.showStudent(i);
             c.moveToFirst();
 
             int idIndex = c.getColumnIndex("id");
@@ -270,9 +236,7 @@ public class MainActivity extends AppCompatActivity {
             EditText text_name = (EditText) findViewById(R.id.text_name);
             EditText text_semester = (EditText) findViewById(R.id.text_semester);
 
-            myDatabase = this.openOrCreateDatabase("Students", MODE_PRIVATE, null);
-
-            Cursor c = myDatabase.rawQuery("SELECT * FROM students WHERE id=" + i, null);
+            Cursor c = RecordController.showStudent(i);
             c.moveToFirst();
 
             int idIndex = c.getColumnIndex("id");
@@ -290,6 +254,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+           // Initializing Buttons
+        button_add    =  findViewById(R.id.button_add);
+        button_update =  findViewById(R.id.button_update);
+        button_delete =  findViewById(R.id.button_delete);
+        button_cancel =  findViewById(R.id.button_cancel);
+        button_Last   =  findViewById(R.id.button_last);
+        button_next   =  findViewById(R.id.button_next);
+        button_prev   =  findViewById(R.id.button_prev);
+        button_first  =  findViewById(R.id.button_first);
+
+            //Initializing Texts
+        text_id       =  findViewById(R.id.text_id);
+        text_name     =  findViewById((R.id.text_name));
+        text_semester =  findViewById(R.id.text_semester);
+
+        record = new RecordController(this);
+
+
         setDetails();
+
     }
 }
