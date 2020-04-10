@@ -42,7 +42,7 @@ public class Database {
         }
      return true;
     }
-  //Hello
+
     public Cursor showStudent(long id){
         return myDatabase.rawQuery("SELECT * FROM students WHERE id=" + id, null);
     }
