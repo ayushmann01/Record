@@ -33,4 +33,8 @@ public class RecordController {
     public boolean delete(int id){
         return database.delete(id);
     }
+
+    public long totalStudents(){
+        return database.totalStudents();
+    }
 }

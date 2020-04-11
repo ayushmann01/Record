@@ -25,11 +25,10 @@ public class Database {
     }
 
     public void addData(long id, String name, int semester){
-        myDatabase.execSQL("INSERT INTO students VALUES (" + id + "," + "'" + name + "'" + "," + semester + ")");
+        myDatabase.execSQL("INSERT INTO students VALUES ("+ id + "," + "'" + name + "'" + "," + semester + ")");
     }
 
     public Cursor getAllData(){
-       long total_student = DatabaseUtils.queryNumEntries(myDatabase,"students");
        return myDatabase.rawQuery("SELECT * FROM students", null);
     }
 
@@ -45,6 +44,11 @@ public class Database {
 
     public Cursor showStudent(long id) {
         return myDatabase.rawQuery("SELECT * FROM students WHERE id=" + id, null);
+    }
+
+    public long totalStudents(){
+        long total_student = DatabaseUtils.queryNumEntries(myDatabase,"students");
+        return total_student;
     }
 
 }
